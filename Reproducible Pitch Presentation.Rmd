@@ -16,14 +16,56 @@ The app then take the calculated BMI and produces an interpretation whether the 
 
 The second tab gives some brief information about the Body Mass Index and shows a more detailed categories table for BMI. 
 
-## Example (Metric) {.smaller}
+## Example {.smaller}
 
-For example, 
+For example, this is a mini version of the BMI Calculator app. 
 
  - height = 1.72 m and 
  - weight = 58 kg. 
 
-```{r}
+```{r, echo = FALSE}
+library(shiny)
+library(miniUI)
+
+shinyApp(
+    ui <- fluidPage(
+        gadgetTitleBar("BMI Calculator"), 
+        sidebarPanel(
+            h3("Calculate your BMI"), 
+            selectInput("unit", "Units", choices = c("Metric", "Imperial")), 
+            numericInput("height", "Height (m or in)", value = 1.72), 
+            numericInput("weight", "Weight (kg or lb)", value = 58), 
+            submitButton("Calculate")
+        ), 
+        mainPanel(
+            h4(textOutput("n_result")), 
+            h4(textOutput("t_result"))
+        )
+    ), 
+    server <- function(input, output){
+        bmi <- reactive({
+            if (input$unit == "Metric") input$weight / (input$height^2) 
+            else input$weight / (input$height^2) * 703
+        })
+        result <- reactive ({
+            if(bmi() < 18.5) "Underweight"
+            else if (bmi() > 18.5 & bmi() < 25) "Normal Weight"
+            else if (bmi() > 25 & bmi() < 30) "Overweight"
+            else if (bmi() > 30) "Obese"
+        })
+        output$n_result <- renderText(paste("BMI: ", round(bmi(), digits = 1)))
+        output$t_result <- renderText(result())
+    }, 
+    options = list(height = 400)
+)
+
+```
+
+## Formula 
+
+The formula behind the app is simplified as below. 
+
+```{r }
 h <- 1.72
 w <- 58
 ### <b>
@@ -37,30 +79,9 @@ if (bmi > 30) result < -"Obese"
 
 So the BMI for this person is `r bmi`, and is within the `r result` range. 
 
-## Example (Imperial) {.smaller}
-
-For example, 
-
- - height = 67 in and 
- - weight = 125 lb. 
-
-```{r}
-h <- 67
-w <- 125
-### <b>
-bmi2 <- w/h^2 * 703
-### </b>
-if (bmi2 < 18.5) result2 <- "Underweight"
-if (bmi2 > 18.5 & bmi2 < 25) result2 <- "Normal (Healthy) Weight"
-if (bmi2 > 25 & bmi2 < 30) result2 <- "Overweight"
-if (bmi2 > 30) result2 < -"Obese"
-```
-
-So the BMI for this person is `r bmi2`, and is within the `r result2` range. 
-
 ## Metric vs. Imperial Formula
 
-You can see that the formula is different for Metric and Imperial units (highlighted in bold). So the following code was written in the `server.R` file to ensure the correct formula is used. 
+There are slightly different formula for metric and imperial units. The following code was written in the `server.R` file to ensure the correct formula is used. 
 
 ```{r eval = FALSE}
 bmi <- reactive({
