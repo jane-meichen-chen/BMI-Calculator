@@ -1,0 +1,70 @@
+---
+title: "BMI Calculator"
+author: "Jane Chen"
+date: "13/05/2017"
+output: ioslides_presentation
+---
+
+```{r echo = FALSE, results = FALSE}
+options(digits = 1)
+```
+
+## Overview of "BMI Calculator" | A brief Description {.build}
+
+The app is written using the R `shiny` package. This main tab is the BMI calculator, which takes the weight and height as input and calculates the BMI using the formula weight over height squares. 
+The app then take the calculated BMI and produces an interpretation whether the entered weight is a normal (healthy) weight for the height entered. 
+
+The second tab gives some brief information about the Body Mass Index and shows a more detailed categories table for BMI. 
+
+## Example (Metric) {.smaller}
+
+For example, 
+
+ - height = 1.72 m and 
+ - weight = 58 kg. 
+
+```{r}
+h <- 1.72
+w <- 58
+### <b>
+bmi <- w/h^2
+### </b>
+if (bmi < 18.5) result <- "Underweight"
+if (bmi > 18.5 & bmi < 25) result <- "Normal (Healthy) Weight"
+if (bmi > 25 & bmi < 30) result <- "Overweight"
+if (bmi > 30) result < -"Obese"
+```
+
+So the BMI for this person is `r bmi`, and is within the `r result` range. 
+
+## Example (Imperial) {.smaller}
+
+For example, 
+
+ - height = 67 in and 
+ - weight = 125 lb. 
+
+```{r}
+h <- 67
+w <- 125
+### <b>
+bmi2 <- w/h^2 * 703
+### </b>
+if (bmi2 < 18.5) result2 <- "Underweight"
+if (bmi2 > 18.5 & bmi2 < 25) result2 <- "Normal (Healthy) Weight"
+if (bmi2 > 25 & bmi2 < 30) result2 <- "Overweight"
+if (bmi2 > 30) result2 < -"Obese"
+```
+
+So the BMI for this person is `r bmi2`, and is within the `r result2` range. 
+
+## Metric vs. Imperial Formula
+
+You can see that the formula is different for Metric and Imperial units (highlighted in bold). So the following code was written in the `server.R` file to ensure the correct formula is used. 
+
+```{r eval = FALSE}
+bmi <- reactive({
+    if (input$unit == "Metric") input$weight / (input$height^2) 
+    else input$weight / (input$height^2) * 703
+})
+```
